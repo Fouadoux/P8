@@ -1,10 +1,15 @@
 package com.openclassrooms.tourguide.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.openclassrooms.tourguide.helper.InternalTestHelper;
 import com.openclassrooms.tourguide.tracker.Tracker;
 import com.openclassrooms.tourguide.user.User;
 import com.openclassrooms.tourguide.user.UserReward;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -95,7 +100,7 @@ public class TourGuideService {
 		return visitedLocation;
 	}
 
-	public List<Attraction> getNearByAttractions(VisitedLocation visitedLocation) {
+	/*public List<Attraction> getNearByAttractions(VisitedLocation visitedLocation) {
 		List<Attraction> nearbyAttractions = new ArrayList<>();
 		for (Attraction attraction : gpsUtil.getAttractions()) {
 			if (rewardsService.isWithinAttractionProximity(attraction, visitedLocation.location)) {
@@ -105,6 +110,54 @@ public class TourGuideService {
 
 		return nearbyAttractions;
 	}
+
+	 */
+
+	public List<ObjectNode> getNearByAttractions(User user,VisitedLocation visitedLocation)  {
+
+		// Récupérer toutes les attractions et calculer les distances
+		List<Attraction> attractions = gpsUtil.getAttractions();
+		Map<Attraction,Double> distanceMap  = new HashMap<>();
+
+		//Calcule la distance entre la localisation du User
+		for (Attraction attraction : attractions) {
+			Double dis=	rewardsService.getDistance(attraction, visitedLocation.location);
+			distanceMap.put(attraction, dis);
+		}
+
+		//trier les attractions par distance croissante
+		List<Map.Entry<Attraction, Double>> sortedAttractions = distanceMap.entrySet()
+				.stream()
+				.sorted(Map.Entry.comparingByValue())
+				.limit(5) // Limiter aux 5 attractions les plus proches
+				.toList();
+
+		// Construire la liste JSON
+		ObjectMapper objectMapper = new ObjectMapper();
+		List<ObjectNode> jsonAttractions = sortedAttractions.stream()
+				.map(entry -> {
+					Attraction attraction = entry.getKey();
+					Double distance = entry.getValue();
+					ObjectNode attractionJson = objectMapper.createObjectNode();
+
+					attractionJson.put("name", attraction.attractionName);
+					attractionJson.put("attractionLatitude", attraction.latitude);
+					attractionJson.put("attractionLongitude", attraction.longitude);
+					attractionJson.put("userLatitude", visitedLocation.location.latitude);
+					attractionJson.put("userLongitude", visitedLocation.location.longitude);
+					attractionJson.put("distance", distance);
+					attractionJson.put("rewardPoints", rewardsService.getRewardPoints(attraction, user));
+
+					return attractionJson;
+				})
+				.collect(Collectors.toList());
+
+		return jsonAttractions;
+
+	}
+
+
+
 
 	private void addShutDownHook() {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
