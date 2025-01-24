@@ -102,21 +102,13 @@ public void startTracking() {
 		log.info("Begin Tracker. Tracking {} users.", users.size());
 		stopWatch.start();
 
-		List<CompletableFuture<Void>> futures = users.stream()
-				.map(user -> CompletableFuture.runAsync(() -> {
+
 					try {
-						tourGuideService.trackUserLocation(user);
+						tourGuideService.trackAllUserLocations(users);
 					} catch (Exception ex) {
-						log.error("Error processing user {}: {}", user.getUserName(), ex.getMessage());
+						log.error("Error while tracking user locations: {}", ex.getMessage());
 					}
-				}, executorService))
-				.collect(Collectors.toList());
 
-		CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
-		isTrackingComplete = true;
-
-		log.info(futures.size() + " users processed.");
-		timeout=futures.size();
 
 		stopWatch.stop();
 		log.debug("Tracker Time Elapsed: {} seconds.", TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));

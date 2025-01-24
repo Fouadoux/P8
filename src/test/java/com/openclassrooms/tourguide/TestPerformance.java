@@ -79,6 +79,35 @@ public class TestPerformance {
 		assertTrue(TimeUnit.MINUTES.toSeconds(15) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
 	}
 
+
+	@Test
+	public void highVolumeTrackLocation2() throws InterruptedException {
+		GpsUtil gpsUtil = new GpsUtil();
+		RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
+
+		// Users should be incremented up to 100,000, and test finishes within 15
+		// minutes
+		InternalTestHelper.setInternalUserNumber(5000);StopWatch stopWatch = new StopWatch();
+
+		TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
+		List<User> allUsers = tourGuideService.getAllUsers();
+
+		stopWatch.start();
+
+		tourGuideService.trackAllUserLocations(allUsers);
+
+		stopWatch.stop();
+
+
+		System.out.println("highVolumeTrackLocation: Time Elapsed: "
+				+ TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) + " seconds.");
+		assertTrue(TimeUnit.MINUTES.toSeconds(15) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
+	}
+
+
+
+
+
 	/*
 	 */
 

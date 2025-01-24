@@ -20,6 +20,8 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -45,10 +47,11 @@ public class TourGuideService {
     public final Tracker tracker;
     boolean testMode = true;
 
+    private ExecutorService executorService = Executors.newFixedThreadPool(10); // Exemple : 10 threads
+
     public TourGuideService (GpsUtil gpsUtil, RewardsService rewardsService) {
         this.gpsUtil = gpsUtil;
         this.rewardsService = rewardsService;
-
         Locale.setDefault(Locale.US);
 
         if (testMode) {
@@ -122,18 +125,44 @@ public class TourGuideService {
         return visitedLocation;
     }
 
-  /*  public CompletableFuture<VisitedLocation> trackUserLocationAsync(User user) {
-        logger.info("Executing trackUserLocationAsync for user {} in thread: {}", user.getUserName(), Thread.currentThread().getName());
+    public CompletableFuture<VisitedLocation> trackUserLocationAsync(User user, ExecutorService executorService) {
+        logger.info("Starting trackUserLocationAsync for user '{}' in thread: {}", user.getUserName(), Thread.currentThread().getName());
 
         return CompletableFuture.supplyAsync(() -> {
-            VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
-            user.addToVisitedLocations(visitedLocation);
-            rewardsService.calculateRewards(user);
-            return visitedLocation;
-        });
+            try {
+                // Obtenir la localisation de l'utilisateur
+                VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
+
+                // Ajouter la localisation visitée à l'utilisateur
+                user.addToVisitedLocations(visitedLocation);
+
+                // Calculer les récompenses pour l'utilisateur
+                rewardsService.calculateRewards(user);
+
+                logger.info("Successfully tracked location for user '{}'", user.getUserName());
+                return visitedLocation;
+            } catch (Exception e) {
+                logger.error("Error tracking location for user '{}': {}", user.getUserName(), e.getMessage(), e);
+                throw new RuntimeException("Error tracking user location", e);
+            }
+        }, executorService); // Utilisation de l'executor personnalisé
     }
 
-   */
+
+    public void trackAllUserLocations(List<User> users) {
+
+        try {
+            List<CompletableFuture<VisitedLocation>> futures = users.stream()
+                    .map(user -> trackUserLocationAsync(user, executorService))
+                    .collect(Collectors.toList());
+
+            // Attendre que tous les utilisateurs soient traités
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+        } finally {
+            executorService.shutdown(); // Assurez-vous de libérer les ressources
+        }
+    }
+
 
 
 
