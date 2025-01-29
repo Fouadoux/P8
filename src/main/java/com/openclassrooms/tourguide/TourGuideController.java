@@ -43,7 +43,7 @@ public class TourGuideController {
         // The reward points for visiting each Attraction.
         //    Note: Attraction reward points can be gathered from RewardsCentral
     @RequestMapping("/getNearbyAttractions") 
-    public List<ObjectNode> getNearbyAttractions(@RequestParam String userName) throws Exception {
+    public List<ObjectNode> getNearbyAttractions(@RequestParam String userName) {
     	VisitedLocation visitedLocation = tourGuideService.getUserLocation(getUser(userName));
         User user = tourGuideService.getUser(userName);
     	return tourGuideService.getNearByAttractions(user,visitedLocation);

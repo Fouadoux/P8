@@ -47,9 +47,9 @@ public class TourGuideService {
     public final Tracker tracker;
     boolean testMode = true;
 
-    private ExecutorService executorService = Executors.newFixedThreadPool(10); // Exemple : 10 threads
+    private final ExecutorService executorService = Executors.newFixedThreadPool(100); // Exemple : 10 threads
 
-    public TourGuideService (GpsUtil gpsUtil, RewardsService rewardsService) {
+    public TourGuideService(GpsUtil gpsUtil, RewardsService rewardsService) {
         this.gpsUtil = gpsUtil;
         this.rewardsService = rewardsService;
         Locale.setDefault(Locale.US);
@@ -62,9 +62,10 @@ public class TourGuideService {
         }
         tracker = new Tracker(this);
         // Démarrer le thread Tracker
-       // tracker.startTracking();
-     //   addShutDownHook();
+       //  tracker.startTracking();
+        addShutDownHook();
     }
+
 
     public void startTracking() {
         if (tracker != null) {
@@ -78,10 +79,6 @@ public class TourGuideService {
             tracker.stopTracking();  // Arrêter le suivi quand nécessaire
         }
     }
-
-
-
-
 
     public List<UserReward> getUserRewards(User user) {
         return user.getUserRewards();
@@ -118,7 +115,6 @@ public class TourGuideService {
 
     public VisitedLocation trackUserLocation(User user) {
 
-		logger.info("Executing trackUserLocationAsync for user {} in thread: {}", user.getUserName(), Thread.currentThread().getName());
         VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
         user.addToVisitedLocations(visitedLocation);
         rewardsService.calculateRewards(user);
@@ -126,9 +122,10 @@ public class TourGuideService {
     }
 
     public CompletableFuture<VisitedLocation> trackUserLocationAsync(User user, ExecutorService executorService) {
-        logger.info("Starting trackUserLocationAsync for user '{}' in thread: {}", user.getUserName(), Thread.currentThread().getName());
 
         return CompletableFuture.supplyAsync(() -> {
+            logger.info("Starting trackUserLocation for user '{}' in thread: {}", user.getUserName(), Thread.currentThread().getName());
+
             try {
                 // Obtenir la localisation de l'utilisateur
                 VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
@@ -148,40 +145,22 @@ public class TourGuideService {
         }, executorService); // Utilisation de l'executor personnalisé
     }
 
-
     public void trackAllUserLocations(List<User> users) {
-
         try {
             List<CompletableFuture<VisitedLocation>> futures = users.stream()
-                    .map(user -> trackUserLocationAsync(user, executorService))
+                    .map(user -> trackUserLocationAsync(user, executorService)
+                            .exceptionally(ex -> {
+                                logger.error("Failed to track location for user '{}': {}", user.getUserName(), ex.getMessage());
+                                return null;
+                            }))
                     .collect(Collectors.toList());
 
-            // Attendre que tous les utilisateurs soient traités
+            // Attendre que toutes les tâches soient terminées
             CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
         } finally {
-            executorService.shutdown(); // Assurez-vous de libérer les ressources
+            executorService.shutdown();
         }
     }
-
-
-
-
-
-
-
-
-	/*public List<Attraction> getNearByAttractions(VisitedLocation visitedLocation) {
-		List<Attraction> nearbyAttractions = new ArrayList<>();
-		for (Attraction attraction : gpsUtil.getAttractions()) {
-			if (rewardsService.isWithinAttractionProximity(attraction, visitedLocation.location)) {
-				nearbyAttractions.add(attraction);
-			}
-		}
-
-		return nearbyAttractions;
-	}
-
-	 */
 
     public List<ObjectNode> getNearByAttractions(User user, VisitedLocation visitedLocation) {
 
