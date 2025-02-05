@@ -3,7 +3,6 @@ pipeline {
 
     environment {
         JAVA_HOME = tool name: 'JDK 17', type: 'JDK'
-        MAVEN_HOME = tool name: 'M3', type: 'Maven'  // Définir le chemin d'installation de Maven
     }
 
     stages {
@@ -17,7 +16,7 @@ pipeline {
         stage('Build') {
             steps {
                 // Compiler avec Maven
-                sh 'mvn clean package -DskipTests'
+                sh 'mvn clean install'
             }
         }
 
