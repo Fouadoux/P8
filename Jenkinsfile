@@ -14,17 +14,30 @@ pipeline {
             }
         }
 
+        stage('Install Missing Dependencies') {
+            steps {
+                // Installer les dépendances manquantes localement si elles ne sont pas dans le dépôt Maven central
+                script {
+                    bat '''
+                    mvn install:install-file -Dfile=C:\\path\\to\\gpsutil-1.0.jar -DgroupId=com.gpsutil -DartifactId=gpsutil -Dversion=1.0 -Dpackaging=jar
+                    mvn install:install-file -Dfile=C:\\path\\to\\trippricer-1.0.jar -DgroupId=com.trippricer -DartifactId=trippricer -Dversion=1.0 -Dpackaging=jar
+                    mvn install:install-file -Dfile=C:\\path\\to\\rewardcentral-1.0.jar -DgroupId=com.rewardcentral -DartifactId=rewardcentral -Dversion=1.0 -Dpackaging=jar
+                    '''
+                }
+            }
+        }
+
         stage('Build') {
             steps {
                 // Compiler avec Maven
-                bat 'mvn clean install || exit 1'
+                bat 'mvn clean install -U || exit 1'
             }
         }
 
         stage('Test') {
             steps {
                 // Exécuter les tests unitaires
-                bat 'mvn test || exit 1'
+                bat 'mvn test'
             }
         }
 
@@ -33,18 +46,12 @@ pipeline {
                 script {
                     // Simuler un déploiement local
                     echo 'Déploiement en local...'
-
-                    // Vérifier si le fichier JAR existe
-                    def jarFile = 'target\\tourguide-0.0.1-SNAPSHOT.jar' // Remplacez par votre nom de JAR
-                    if (fileExists(jarFile)) {
-                        // Copier le JAR généré vers le répertoire local de déploiement
-                        bat "copy ${jarFile} C:\\Users\\fouad\\Documents\\openclassroom\\P8\\deployTest\\"
-                        
-                        // Simuler l'exécution de l'application localement
-                        bat "java -jar C:\\Users\\fouad\\Documents\\openclassroom\\P8\\deployTest\\tourguide-0.0.1-SNAPSHOT.jar"
-                    } else {
-                        echo "Le fichier JAR n'a pas été trouvé dans le répertoire target."
-                    }
+                    
+                    // Copier le JAR généré vers le répertoire local de déploiement
+                    bat 'copy target\\*.jar C:\\Users\\fouad\\Documents\\openclassroom\\P8\\deployTest\\'
+                    
+                    // Simuler l'exécution de l'application localement
+                    bat 'java -jar C:\\Users\\fouad\\Documents\\openclassroom\\P8\\deployTest\\your-app.jar'
                 }
             }
         }
