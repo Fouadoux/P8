@@ -1,78 +1,59 @@
 pipeline {
-    agent {
-        docker {
-            image 'maven:3.8.6-openjdk-17' // Image avec Maven et JDK 17
-        }
-    }
+    agent any
 
     environment {
-        MAVEN_OPTS = "-Dmaven.repo.local=.m2/repository"
+        JAVA_HOME = tool name: 'JDK 17', type: 'JDK'
+        MAVEN_HOME = tool name: 'M3', type: 'Maven'  // Définir le chemin d'installation de Maven
     }
 
     stages {
-        stage('Checkout Repository') {
+        stage('Checkout') {
             steps {
-                script {
-                    checkout scm
-                }
+                // Récupérer le code depuis Git
+                checkout scm
             }
         }
 
-        stage('Cache Maven Dependencies') {
+        stage('Build') {
             steps {
-                sh 'mvn dependency:go-offline'
+                // Compiler avec Maven
+                sh 'mvn clean package -DskipTests'
             }
         }
 
-        stage('Download Local JARs') {
+        stage('Test') {
             steps {
-                sh '''
-                mkdir -p libs
-                curl -L -o libs/gpsUtil.jar "https://raw.githubusercontent.com/Fouadoux/P8/dev/libs/gpsUtil.jar"
-                curl -L -o libs/RewardCentral.jar "https://raw.githubusercontent.com/Fouadoux/P8/dev/libs/RewardCentral.jar"
-                curl -L -o libs/TripPricer.jar "https://raw.githubusercontent.com/Fouadoux/P8/dev/libs/TripPricer.jar"
-                '''
-            }
-        }
-
-        stage('Install Local JARs') {
-            steps {
-                sh '''
-                mvn install:install-file -Dfile=libs/gpsUtil.jar -DgroupId=com.gpsutil -DartifactId=gpsutil -Dversion=1.0 -Dpackaging=jar
-                mvn install:install-file -Dfile=libs/RewardCentral.jar -DgroupId=com.rewardcentral -DartifactId=rewardcentral -Dversion=1.0 -Dpackaging=jar
-                mvn install:install-file -Dfile=libs/TripPricer.jar -DgroupId=com.trippricer -DartifactId=trippricer -Dversion=1.0 -Dpackaging=jar
-                '''
-            }
-        }
-
-        stage('Build with Maven') {
-            steps {
-                sh 'mvn -B package'
-            }
-        }
-
-        stage('Run Tests') {
-            steps {
+                // Exécuter les tests unitaires
                 sh 'mvn test'
             }
         }
 
-        stage('Archive Build Artifacts') {
+        stage('Deploy to Local') {
             steps {
-                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                script {
+                    // Simuler un déploiement local
+                    echo 'Déploiement en local...'
+                    
+                    // Copier le JAR généré vers le répertoire local de déploiement
+                    bat 'copy target\\*.jar C:\\Users\\fouad\\Documents\\openclassroom\\P8\\deployTest\\'
+                    
+                    // Simuler l'exécution de l'application localement
+                    bat 'java -jar C:\\Users\\fouad\\Documents\\openclassroom\\P8\\deployTest\\your-app.jar'
+                }
             }
         }
+    }
 
-        stage('Deploy to Production') {
-            when {
-                expression { env.BRANCH_NAME == 'main' } // Déploiement seulement sur 'main'
-            }
-            steps {
-                sh '''
-                echo "Deploying to production..."
-                # Ajoutez ici les commandes spécifiques au déploiement (ex: SCP, SSH, Docker, K8s)
-                '''
-            }
+    post {
+        always {
+            // Actions à effectuer après chaque pipeline, qu'il réussisse ou échoue
+            echo 'Pipeline terminé.'
+        }
+        success {
+            echo 'Le pipeline a réussi.'
+        }
+        failure {
+            echo 'Le pipeline a échoué.'
         }
     }
 }
