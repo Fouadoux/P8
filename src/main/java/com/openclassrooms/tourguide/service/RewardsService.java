@@ -28,7 +28,7 @@ public class RewardsService {
 
     // proximity in miles
     private int defaultProximityBuffer = 10;
-    private int proximityBuffer = defaultProximityBuffer;
+    public int proximityBuffer = defaultProximityBuffer;
     private int attractionProximityRange = 200;
     private final GpsUtil gpsUtil;
     private final RewardCentral rewardsCentral;
@@ -47,20 +47,25 @@ public class RewardsService {
     }
 
     public void calculateRewards(User user) {
-       // log.info("Executing calculateReward for user {} in thread: {}", user.getUserName(), Thread.currentThread().getName());
+        log.info("Executing calculateReward for user {} in thread: {}", user.getUserName(), Thread.currentThread().getName());
 
         List<VisitedLocation> userLocations = user.getVisitedLocations(); //liste des localisations visité
         List<Attraction> attractions = gpsUtil.getAttractions(); // liste des localisations des attractions
 
         for (VisitedLocation visitedLocation : userLocations) {
+            log.info("VisitedLocation: {}", visitedLocation);
             for (Attraction attraction : attractions) {
+                log.info("Attraction: {}", attraction);
                 if (user.getUserRewards().stream().filter(r -> r.attraction.attractionName.equals(attraction.attractionName)).count() == 0) {
+                   log.info("User reward found for attraction {}", attraction.attractionName);
                     if (nearAttraction(visitedLocation, attraction)) {
+                        log.info("add reward for attraction {}", attraction.attractionName);
                         user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
                     }
                 }
             }
         }
+        log.info(user.getUserRewards().size() + " user rewards found");
     }
 
 	public CompletableFuture<Void> calculateRewardsAsync(User user, ExecutorService executorService, List<Attraction> attractions) {

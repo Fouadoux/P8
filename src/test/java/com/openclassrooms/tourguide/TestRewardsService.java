@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.openclassrooms.tourguide.tracker.Tracker;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -21,6 +22,7 @@ import com.openclassrooms.tourguide.service.TourGuideService;
 import com.openclassrooms.tourguide.user.User;
 import com.openclassrooms.tourguide.user.UserReward;
 
+@Slf4j
 public class TestRewardsService {
 
 	@Test
@@ -54,7 +56,7 @@ public class TestRewardsService {
 
 	//@Disabled // Needs fixed - can throw ConcurrentModificationException
 	@Test
-	public void nearAllAttractions() {
+	public void nearAllAttractions() throws InterruptedException {
 		GpsUtil gpsUtil = new GpsUtil();
 		RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
 
@@ -66,12 +68,16 @@ public class TestRewardsService {
 		TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
 		Tracker tracker=new Tracker(tourGuideService);
 
-		tracker.startTracking();
-		tracker.stopTracking();
-		rewardsService.calculateRewards(tourGuideService.getAllUsers().get(0));
-		List<UserReward> userRewards = tourGuideService.getUserRewards(tourGuideService.getAllUsers().get(0));
+		User user = tourGuideService.getAllUsers().get(0);
+		List<User> allUsers = tourGuideService.getAllUsers();
 
-		assertEquals(1, userRewards.size());
-	}
+		tourGuideService.trackAllUserLocations(allUsers);
+
+		//tourGuideService.trackUserLocation(tourGuideService.getAllUsers().get(0)); // renvoie la derniere localisation
+		//rewardsService.calculateRewards(tourGuideService.getAllUsers().get(0)); //calcule les reward par rapport a la derniere localisation, utilise la méthode nearAttraction pour verifier si distance
+		//List<UserReward> userRewards = tourGuideService.getUserRewards(tourGuideService.getAllUsers().get(0));
+		//tracker.stopTracking();
+		log.info("userRewards: {}", user.getUserRewards().size());
+		assertEquals(gpsUtil.getAttractions().size(), user.getUserRewards().size());	}
 
 }

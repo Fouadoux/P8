@@ -117,7 +117,7 @@ public class TourGuideService {
 
         VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
         user.addToVisitedLocations(visitedLocation);
-        rewardsService.calculateRewards(user);
+       // rewardsService.calculateRewards(user);
         return visitedLocation;
     }
 
@@ -128,13 +128,17 @@ public class TourGuideService {
 
             try {
                 // Obtenir la localisation de l'utilisateur
+                logger.info("1");
                 VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
 
-                // Ajouter la localisation visitée à l'utilisateur
+                // Ajouter la localisation visitée à l'
+                logger.info("2");
                 user.addToVisitedLocations(visitedLocation);
 
                 // Calculer les récompenses pour l'utilisateur
+                logger.info("3");
                 rewardsService.calculateRewards(user);
+
 
                 logger.info("Successfully tracked location for user '{}'", user.getUserName());
                 return visitedLocation;
@@ -145,7 +149,7 @@ public class TourGuideService {
         }, executorService); // Utilisation de l'executor personnalisé
     }
 
-    public void trackAllUserLocations(List<User> users) {
+    public void trackAllUserLocations1(List<User> users) {
         try {
             List<CompletableFuture<VisitedLocation>> futures = users.stream()
                     .map(user -> trackUserLocationAsync(user, executorService)
@@ -153,11 +157,35 @@ public class TourGuideService {
                                 logger.error("Failed to track location for user '{}': {}", user.getUserName(), ex.getMessage());
                                 return null;
                             }))
-                    .collect(Collectors.toList());
+                    .toList();
 
             // Attendre que toutes les tâches soient terminées
             CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
         } finally {
+            executorService.shutdown();
+        }
+    }
+
+    public void trackAllUserLocations(List<User> users) {
+        try {
+            logger.info("Tracking {} users asynchronously...", users.size());
+
+            List<CompletableFuture<VisitedLocation>> futures = users.stream()
+                    .map(user -> trackUserLocationAsync(user, executorService)
+                            .exceptionally(ex -> {
+                                logger.error("Failed to track location for user '{}': {}", user.getUserName(), ex.getMessage());
+                                return null;
+                            }))
+                    .toList();
+
+            logger.info("Waiting for all tracking tasks to complete...");
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+            logger.info("All tracking tasks completed!");
+
+        } catch (Exception e) {
+            logger.error("Error during tracking: {}", e.getMessage(), e);
+        } finally {
+            logger.info("Shutting down executorService...");
             executorService.shutdown();
         }
     }
