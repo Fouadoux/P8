@@ -2,7 +2,8 @@ pipeline {
     agent any
 
     environment {
-        JAVA_HOME = tool name: 'JDK 17', type: 'JDK'
+        JAVA_HOME = "C:\\Program Files\\Java\\jdk-22"
+        PATH = "${JAVA_HOME}\\bin;${env.PATH}"
     }
 
     stages {
