@@ -19,9 +19,9 @@ pipeline {
                 // Installer les dépendances manquantes localement si elles ne sont pas dans le dépôt Maven central
                 script {
                     bat '''
-                    mvn install:install-file -Dfile=C:\\Users\\fouad\\Documents\\openclassroom\\P8\\TourGuide\\libs\\gpsutil-1.0.jar -DgroupId=com.gpsutil -DartifactId=gpsutil -Dversion=1.0 -Dpackaging=jar
-                    mvn install:install-file -Dfile=C:\\Users\\fouad\\Documents\\openclassroom\\P8\\TourGuide\\libs\\trippricer-1.0.jar -DgroupId=com.trippricer -DartifactId=trippricer -Dversion=1.0 -Dpackaging=jar
-                    mvn install:install-file -Dfile=C:\\Users\\fouad\\Documents\\openclassroom\\P8\\TourGuide\\libs\\rewardcentral-1.0.jar -DgroupId=com.rewardcentral -DartifactId=rewardcentral -Dversion=1.0 -Dpackaging=jar
+                    mvn install:install-file -Dfile=C:\\Users\\fouad\\Documents\\openclassroom\\P8\\TourGuide\\libs\\gpsutil.jar -DgroupId=com.gpsutil -DartifactId=gpsutil -Dversion=1.0 -Dpackaging=jar
+                    mvn install:install-file -Dfile=C:\\Users\\fouad\\Documents\\openclassroom\\P8\\TourGuide\\libs\\trippricer.jar -DgroupId=com.trippricer -DartifactId=trippricer -Dversion=1.0 -Dpackaging=jar
+                    mvn install:install-file -Dfile=C:\\Users\\fouad\\Documents\\openclassroom\\P8\\TourGuide\\libs\\rewardcentral.jar -DgroupId=com.rewardcentral -DartifactId=rewardcentral -Dversion=1.0 -Dpackaging=jar
                     '''
                 }
             }
