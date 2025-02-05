@@ -51,7 +51,7 @@ pipeline {
                     bat 'copy target\\*.jar C:\\Users\\fouad\\Documents\\openclassroom\\P8\\deployTest\\'
                     
                     // Simuler l'exécution de l'application localement
-                    bat 'java -jar C:\\Users\\fouad\\Documents\\openclassroom\\P8\\deployTest\\your-app.jar'
+                    bat 'java -jar C:\\Users\\fouad\\Documents\\openclassroom\\P8\\deployTest\\tourguide-0.0.1-SNAPSHOT'
                 }
             }
         }
