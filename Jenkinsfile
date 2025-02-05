@@ -17,14 +17,14 @@ pipeline {
         stage('Build') {
             steps {
                 // Compiler avec Maven
-                sh 'mvn clean install'
+                bat 'mvn clean install'
             }
         }
 
         stage('Test') {
             steps {
                 // Exécuter les tests unitaires
-                sh 'mvn test'
+                bat 'mvn test'
             }
         }
 
