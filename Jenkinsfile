@@ -20,8 +20,8 @@ pipeline {
                 script {
                     bat '''
                     mvn install:install-file -Dfile=C:\\Users\\fouad\\Documents\\openclassroom\\P8\\TourGuide\\libs\\gpsutil.jar -DgroupId=com.gpsutil -DartifactId=gpsutil -Dversion=1.0 -Dpackaging=jar
-                    mvn install:install-file -Dfile=C:\\Users\\fouad\\Documents\\openclassroom\\P8\\TourGuide\\libs\\TripPricer.jar -DgroupId=com.tripPricer -DartifactId=tripPricer -Dversion=1.0 -Dpackaging=jar
-                    mvn install:install-file -Dfile=C:\\Users\\fouad\\Documents\\openclassroom\\P8\\TourGuide\\libs\\RewardCentral.jar -DgroupId=com.rewardCentral -DartifactId=rewardCentral -Dversion=1.0 -Dpackaging=jar
+                    mvn install:install-file -Dfile=C:\\Users\\fouad\\Documents\\openclassroom\\P8\\TourGuide\\libs\\trippricer.jar -DgroupId=com.trippricer -DartifactId=trippricer -Dversion=1.0 -Dpackaging=jar
+                    mvn install:install-file -Dfile=C:\\Users\\fouad\\Documents\\openclassroom\\P8\\TourGuide\\libs\\rewardcentral.jar -DgroupId=com.rewardcentral -DartifactId=rewardcentral -Dversion=1.0 -Dpackaging=jar
                     '''
                 }
             }
