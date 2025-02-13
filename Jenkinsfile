@@ -8,25 +8,6 @@ pipeline {
 
     stages {
         stage('Checkout') {
-
-            steps {
-                checkout scm
-            }
-        }
-
-        stage('Build') {
-            steps {
-                bat 'mvn clean install'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                bat 'mvn test'
-            }
-        }
-
-        stage('Deploy to Local') {
             steps {
                 checkout scm
             }
@@ -35,46 +16,53 @@ pipeline {
         stage('Install Missing Dependencies') {
             steps {
                 script {
+                    echo 'Installation des dépendances locales...'
                     bat '''
-                    mvn install:install-file -Dfile=C:\\Users\\fouad\\Documents\\openclassroom\\P8\\TourGuide\\libs\\gpsutil.jar -DgroupId=com.gpsutil -DartifactId=gpsutil -Dversion=1.0 -Dpackaging=jar
-                    mvn install:install-file -Dfile=C:\\Users\\fouad\\Documents\\openclassroom\\P8\\TourGuide\\libs\\RewardCentral.jar -DgroupId=com.rewardcentral -DartifactId=rewardcentral -Dversion=1.0 -Dpackaging=jar
-                    mvn install:install-file -Dfile=C:\\Users\\fouad\\Documents\\openclassroom\\P8\\TourGuide\\libs\\TripPricer.jar -DgroupId=com.trippricer -DartifactId=trippricer -Dversion=1.0 -Dpackaging=jar
+                    cmd /c mvn install:install-file -Dfile=C:\\Users\\fouad\\Documents\\openclassroom\\P8\\TourGuide\\libs\\gpsutil.jar -DgroupId=com.gpsutil -DartifactId=gpsutil -Dversion=1.0 -Dpackaging=jar
+                    cmd /c mvn install:install-file -Dfile=C:\\Users\\fouad\\Documents\\openclassroom\\P8\\TourGuide\\libs\\RewardCentral.jar -DgroupId=com.rewardcentral -DartifactId=rewardcentral -Dversion=1.0 -Dpackaging=jar
+                    cmd /c mvn install:install-file -Dfile=C:\\Users\\fouad\\Documents\\openclassroom\\P8\\TourGuide\\libs\\TripPricer.jar -DgroupId=com.trippricer -DartifactId=trippricer -Dversion=1.0 -Dpackaging=jar
                     '''
-                    echo 'Déploiement en local...'
-                    
-                    bat 'copy target\\*.jar C:\\Users\\fouad\\Documents\\openclassroom\\P8\\deployTest\\'
-                    
-                    bat 'java -jar C:\\Users\\fouad\\Documents\\openclassroom\\P8\\deployTest\\your-app.jar'
                 }
             }
         }
-    }
 
         stage('Build') {
             steps {
-                // Compiler avec Maven
-                bat 'mvn clean install -U || exit 1'
+                script {
+                    echo 'Compilation du projet...'
+                    bat 'cmd /c mvn clean install -U || exit 1'
+                }
             }
         }
 
         stage('Test') {
             steps {
-                // Exécuter les tests unitaires
-                bat 'mvn test'
+                script {
+                    echo 'Exécution des tests unitaires...'
+                    bat 'cmd /c mvn test || exit 1'
+                }
             }
         }
 
         stage('Deploy to Local') {
             steps {
                 script {
-                    // Simuler un déploiement local
                     echo 'Déploiement en local...'
                     
-                    // Copier le JAR généré vers le répertoire local de déploiement
-                    bat 'copy target\\*.jar C:\\Users\\fouad\\Documents\\openclassroom\\P8\\deployTest\\'
-                    
-                    // Simuler l'exécution de l'application localement
-                    bat 'java -jar C:\\Users\\fouad\\Documents\\openclassroom\\P8\\deployTest\\tourguide-0.0.1-SNAPSHOT.jar'
+                    // Copier le fichier JAR généré
+                    bat 'cmd /c copy target\\tourguide-0.0.1-SNAPSHOT.jar C:\\Users\\fouad\\Documents\\openclassroom\\P8\\deployTest\\'
+
+                    // Lancer l'application localement
+                    bat 'cmd /c java -jar C:\\Users\\fouad\\Documents\\openclassroom\\P8\\deployTest\\tourguide-0.0.1-SNAPSHOT.jar'
+                }
+            }
+        }
+
+        stage('Clean Up') {
+            steps {
+                script {
+                    echo 'Nettoyage des fichiers temporaires...'
+                    bat 'cmd /c del /Q target\\*.jar'
                 }
             }
         }
@@ -82,7 +70,6 @@ pipeline {
 
     post {
         always {
-            // Actions à effectuer après chaque pipeline, qu'il réussisse ou échoue
             echo 'Pipeline terminé.'
         }
         success {
