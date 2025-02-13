@@ -8,8 +8,7 @@ pipeline {
 
     stages {
         stage('Checkout') {
-<<<<<<< HEAD
-=======
+
             steps {
                 checkout scm
             }
@@ -28,36 +27,29 @@ pipeline {
         }
 
         stage('Deploy to Local') {
->>>>>>> 387a2c8 (projet terminer)
             steps {
-                // Récupérer le code depuis Git
                 checkout scm
             }
         }
 
         stage('Install Missing Dependencies') {
             steps {
-                // Installer les dépendances manquantes localement si elles ne sont pas dans le dépôt Maven central
                 script {
-<<<<<<< HEAD
                     bat '''
                     mvn install:install-file -Dfile=C:\\Users\\fouad\\Documents\\openclassroom\\P8\\TourGuide\\libs\\gpsutil.jar -DgroupId=com.gpsutil -DartifactId=gpsutil -Dversion=1.0 -Dpackaging=jar
                     mvn install:install-file -Dfile=C:\\Users\\fouad\\Documents\\openclassroom\\P8\\TourGuide\\libs\\RewardCentral.jar -DgroupId=com.rewardcentral -DartifactId=rewardcentral -Dversion=1.0 -Dpackaging=jar
                     mvn install:install-file -Dfile=C:\\Users\\fouad\\Documents\\openclassroom\\P8\\TourGuide\\libs\\TripPricer.jar -DgroupId=com.trippricer -DartifactId=trippricer -Dversion=1.0 -Dpackaging=jar
                     '''
-=======
                     echo 'Déploiement en local...'
                     
                     bat 'copy target\\*.jar C:\\Users\\fouad\\Documents\\openclassroom\\P8\\deployTest\\'
                     
                     bat 'java -jar C:\\Users\\fouad\\Documents\\openclassroom\\P8\\deployTest\\your-app.jar'
->>>>>>> 387a2c8 (projet terminer)
                 }
             }
         }
     }
 
-<<<<<<< HEAD
         stage('Build') {
             steps {
                 // Compiler avec Maven
@@ -101,7 +93,7 @@ pipeline {
         }
     }
 }
-=======
+
     post {
         always {
             echo 'Pipeline terminé.'
@@ -114,4 +106,3 @@ pipeline {
         }
     }
 }
->>>>>>> 387a2c8 (projet terminer)
