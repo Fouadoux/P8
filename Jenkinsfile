@@ -92,7 +92,7 @@ pipeline {
             echo 'Le pipeline a échoué.'
         }
     }
-}
+
 
     post {
         always {
