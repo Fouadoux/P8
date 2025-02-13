@@ -92,17 +92,4 @@ pipeline {
             echo 'Le pipeline a échoué.'
         }
     }
-
-
-    post {
-        always {
-            echo 'Pipeline terminé.'
-        }
-        success {
-            echo 'Le pipeline a réussi.'
-        }
-        failure {
-            echo 'Le pipeline a échoué.'
-        }
-    }
 }
