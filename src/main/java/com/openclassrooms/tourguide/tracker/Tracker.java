@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
 public class Tracker {
 
     /** Interval in seconds between tracking executions. */
-    private static final long trackingPollingInterval = TimeUnit.MINUTES.toSeconds(1);
+    private static final long trackingPollingInterval = TimeUnit.MINUTES.toSeconds(5);
 
     /** Scheduled executor service for periodic tracking. */
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
