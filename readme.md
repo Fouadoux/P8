@@ -6,17 +6,15 @@ TourGuide est une application Spring Boot permettant aux utilisateurs de trouver
 Suite à une croissance rapide du nombre d’utilisateurs, le projet a subi des optimisations majeures pour améliorer ses performances et sa scalabilité.
 ⚙️ Technologies
 
-    Back-end : Java 11+, Spring Boot, Spring Security, Spring Data JPA
-    Base de données : H2 (test), PostgreSQL/MySQL (prod)
+    Back-end : Java 11+, Spring Boot
     Services externes : gpsUtil, RewardsCentral
-    CI/CD : GitHub Actions/Jenkins
-    Tests de charge : JMeter
+    CI/CD : GitHub Actions, Jenkins, GitLabs
 
 🚀 Optimisations Majeures
 
     Amélioration de gpsUtil : Réduction du temps de récupération des emplacements pour 100 000 utilisateurs en <15 min.
     Optimisation de RewardsCentral : Accélération du calcul des récompenses pour 100 000 utilisateurs en <20 min.
-    Correction des bugs : Recommandations d’attractions désormais toujours affichées, correction des tests intermittents.
+    Correction des bugs : Recommandations d’attractions, correction des tests intermittents.
     Pipeline CI/CD : Automatisation du build, des tests et du déploiement.
     
 # Technologies
