@@ -10,20 +10,12 @@ import com.openclassrooms.tourguide.user.UserReward;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import gpsUtil.GpsUtil;
@@ -78,6 +70,7 @@ public class TourGuideService {
     public List<UserReward> getUserRewards(User user) {
         return user.getUserRewards();
     }
+
 
     /**
      * Retrieves the last known location of a user or tracks a new location if none exists.
@@ -159,11 +152,11 @@ public class TourGuideService {
     public CompletableFuture<VisitedLocation> trackUserLocationAsync(User user, ExecutorService executorService) {
 
         return CompletableFuture.supplyAsync(() -> {
-
+            log.info("Tracking user location");
             try {
                 VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
                 user.addToVisitedLocations(visitedLocation);
-                rewardsService.calculateRewards(user);
+                CompletableFuture.runAsync(() -> rewardsService.calculateRewards(user), executorService);
                 return visitedLocation;
             } catch (Exception e) {
                 log.error("Error tracking location for user '{}': {}", user.getUserName(), e.getMessage(), e);
@@ -177,25 +170,41 @@ public class TourGuideService {
      *
      * @param users The list of users whose locations need to be tracked.
      */
+
     public void trackAllUserLocations(List<User> users) {
         try {
+            log.info("Tracking all user locations");
 
             List<CompletableFuture<VisitedLocation>> futures = users.stream()
                     .map(user -> trackUserLocationAsync(user, executorService)
-                            .exceptionally(ex -> {
-                                log.error("Failed to track location for user '{}': {}", user.getUserName(), ex.getMessage());
-                                return null;
+                            .handle((result, ex) -> {
+                                if (ex != null) {
+                                    log.error("Failed to track location for user '{}': {}", user.getUserName(), ex.getMessage());
+                                    return null; // Ou une valeur par défaut
+                                }
+                                return result;
                             }))
-                    .toList();
+                    .collect(Collectors.toList()); // Évite une liste immutable
 
             log.info("Waiting for all tracking tasks to complete...");
-            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
-            log.info("All tracking tasks completed!");
+            CompletableFuture<Void> allTasks = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+
+            // Attendre la fin des tâches avec gestion des erreurs
+            allTasks.join();
+
+            // Vérifier si certaines tâches ont échoué
+            long failedCount = futures.stream().filter(f -> f.isCompletedExceptionally()).count();
+            if (failedCount > 0) {
+                log.warn("Tracking completed, but {} users failed to be tracked.", failedCount);
+            } else {
+                log.info("All tracking tasks completed successfully!");
+            }
 
         } catch (Exception e) {
             log.error("Error during tracking: {}", e.getMessage(), e);
         }
     }
+
 
     /**
      * Retrieves the five nearest tourist attractions based on the user's current location.

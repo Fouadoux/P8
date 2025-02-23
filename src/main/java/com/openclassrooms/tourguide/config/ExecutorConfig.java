@@ -23,10 +23,10 @@ public class ExecutorConfig {
      * Constructs an {@code ExecutorConfig} with a fixed thread pool size.
      * The pool size can be configured via the {@code executor.pool.size} property.
      *
-     * @param poolSize the number of threads in the pool, defaults to 4 if not specified.
+     * @param //poolSize the number of threads in the pool, defaults to 4 if not specified.
      */
-    public ExecutorConfig(@Value("${executor.pool.size:4}") int poolSize) {
-        this.executorService = Executors.newFixedThreadPool(poolSize);
+    public ExecutorConfig() {
+        this.executorService = Executors.newCachedThreadPool();
     }
 
     /**

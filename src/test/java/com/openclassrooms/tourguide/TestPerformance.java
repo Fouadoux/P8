@@ -3,19 +3,13 @@ package com.openclassrooms.tourguide;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import com.openclassrooms.tourguide.config.ExecutorConfig;
-import com.openclassrooms.tourguide.tracker.Tracker;
-import org.apache.commons.lang3.time.StopWatch;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
 
+import org.apache.commons.lang3.time.StopWatch;
+import org.junit.jupiter.api.Test;
 import gpsUtil.GpsUtil;
 import gpsUtil.location.Attraction;
 import gpsUtil.location.VisitedLocation;
@@ -55,13 +49,14 @@ public class TestPerformance {
 	 */
 	@Test
 	public void highVolumeTrackLocation() {
-		ExecutorService executorService = Executors.newFixedThreadPool(100);
+		ExecutorService executorService = Executors.newCachedThreadPool();
 		GpsUtil gpsUtil = new GpsUtil();
 		RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral(),executorService);
 
 		// Users should be incremented up to 100,000, and test finishes within 15
 		// minutes
-		InternalTestHelper.setInternalUserNumber(100000);StopWatch stopWatch = new StopWatch();
+		InternalTestHelper.setInternalUserNumber(100000);
+		StopWatch stopWatch = new StopWatch();
 
 
 
@@ -85,7 +80,7 @@ public class TestPerformance {
 
 	@Test
 	public void highVolumeGetRewardsTEST() {
-		ExecutorService executorService = Executors.newFixedThreadPool(100);
+		ExecutorService executorService = Executors.newCachedThreadPool();
 		GpsUtil gpsUtil = new GpsUtil();
 		RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral(),executorService);
 

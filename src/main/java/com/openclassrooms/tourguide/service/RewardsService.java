@@ -4,13 +4,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
 import java.util.stream.Collectors;
 
-import com.openclassrooms.tourguide.config.ExecutorConfig;
+
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.juli.logging.Log;
+
 import org.springframework.stereotype.Service;
 
 import gpsUtil.GpsUtil;
@@ -66,8 +66,7 @@ public class RewardsService {
      *
      * @param user The user for whom rewards should be calculated.
      */
-    public void calculateRewards(User user) {
-
+    public synchronized void calculateRewards(User user) {
         List<VisitedLocation> userLocations = user.getVisitedLocations();
         List<Attraction> attractions = gpsUtil.getAttractions();
 
@@ -87,12 +86,10 @@ public class RewardsService {
      *
      * @param user        The user for whom rewards should be calculated.
      * @param executorService The thread pool executor for handling the task asynchronously.
-     * @param attractions The list of attractions to compare against.
      * @return A CompletableFuture representing the completion of the reward calculation.
      */
-	public CompletableFuture<Void> calculateRewardsAsync(User user, ExecutorService executorService, List<Attraction> attractions) {
+	public CompletableFuture<Void> calculateRewardsAsync(User user, ExecutorService executorService,List<Attraction> attractions) {
 		List<VisitedLocation> userLocations = user.getVisitedLocations(); // Liste des localisations visitées
-
 
 		return CompletableFuture.runAsync(() -> {
 
@@ -128,7 +125,7 @@ public class RewardsService {
 
         try {
             List<CompletableFuture<Void>> futures = users.stream()
-                    .map(user -> calculateRewardsAsync(user, executorService, attractions))
+                    .map(user -> calculateRewardsAsync(user, executorService,attractions))
                     .collect(Collectors.toList());
 
             CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();

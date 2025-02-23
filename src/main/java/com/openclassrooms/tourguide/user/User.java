@@ -1,9 +1,8 @@
 package com.openclassrooms.tourguide.user;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import gpsUtil.location.VisitedLocation;
 import tripPricer.Provider;
@@ -14,7 +13,7 @@ public class User {
 	private String phoneNumber;
 	private String emailAddress;
 	private Date latestLocationTimestamp;
-	private List<VisitedLocation> visitedLocations = new ArrayList<>();
+	private final List<VisitedLocation> visitedLocations = new CopyOnWriteArrayList<>();
 	private List<UserReward> userRewards = new ArrayList<>();
 	private UserPreferences userPreferences = new UserPreferences();
 	private List<Provider> tripDeals = new ArrayList<>();
@@ -58,7 +57,7 @@ public class User {
 		return latestLocationTimestamp;
 	}
 	
-	public synchronized void addToVisitedLocations(VisitedLocation visitedLocation) {
+	public  void addToVisitedLocations(VisitedLocation visitedLocation) {
 		visitedLocations.add(visitedLocation);
 	}
 	
@@ -70,13 +69,22 @@ public class User {
 		visitedLocations.clear();
 	}
 
+
+	/*public  void addUserReward(UserReward userReward) {
+		if(userRewards.stream().filter(r -> r.attraction.attractionName.equals(userReward.attraction.attractionName)).count() == 0) {
+			userRewards.add(userReward);
+		}
+	}
+
+	 */
+
 	public synchronized void addUserReward(UserReward userReward) {
 		if(userRewards.stream().noneMatch(r -> r.attraction.attractionName.equals(userReward.attraction.attractionName))) {
 			userRewards.add(userReward);
 		}
 	}
-	
-	public List<UserReward> getUserRewards() {
+
+	public  List<UserReward> getUserRewards() {
 		return userRewards;
 	}
 	
