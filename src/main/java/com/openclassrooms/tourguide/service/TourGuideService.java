@@ -180,19 +180,17 @@ public class TourGuideService {
                             .handle((result, ex) -> {
                                 if (ex != null) {
                                     log.error("Failed to track location for user '{}': {}", user.getUserName(), ex.getMessage());
-                                    return null; // Ou une valeur par défaut
+                                    return null;
                                 }
                                 return result;
                             }))
-                    .collect(Collectors.toList()); // Évite une liste immutable
+                    .collect(Collectors.toList());
 
             log.info("Waiting for all tracking tasks to complete...");
             CompletableFuture<Void> allTasks = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
 
-            // Attendre la fin des tâches avec gestion des erreurs
             allTasks.join();
 
-            // Vérifier si certaines tâches ont échoué
             long failedCount = futures.stream().filter(f -> f.isCompletedExceptionally()).count();
             if (failedCount > 0) {
                 log.warn("Tracking completed, but {} users failed to be tracked.", failedCount);

@@ -25,8 +25,8 @@ public class ExecutorConfig {
      *
      * @param //poolSize the number of threads in the pool, defaults to 4 if not specified.
      */
-    public ExecutorConfig() {
-        this.executorService = Executors.newCachedThreadPool();
+    public ExecutorConfig(@Value("${executor.pool.size:4}") int poolSize) {
+        this.executorService = Executors.newFixedThreadPool(poolSize);
     }
 
     /**

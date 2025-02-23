@@ -49,7 +49,7 @@ public class TestPerformance {
 	 */
 	@Test
 	public void highVolumeTrackLocation() {
-		ExecutorService executorService = Executors.newCachedThreadPool();
+		ExecutorService executorService = Executors.newFixedThreadPool(100);
 		GpsUtil gpsUtil = new GpsUtil();
 		RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral(),executorService);
 
@@ -80,7 +80,7 @@ public class TestPerformance {
 
 	@Test
 	public void highVolumeGetRewardsTEST() {
-		ExecutorService executorService = Executors.newCachedThreadPool();
+		ExecutorService executorService = Executors.newFixedThreadPool(100);
 		GpsUtil gpsUtil = new GpsUtil();
 		RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral(),executorService);
 
