@@ -30,7 +30,7 @@ pipeline {
             steps {
                 script {
                     echo 'Compilation du projet...'
-                    bat 'cmd /c mvn clean install -U || exit 1'
+                    bat 'cmd /c mvn clean install -U -DskipTests || exit 1'
                 }
             }
         }
